@@ -20,6 +20,20 @@ from urllib.parse import parse_qs
 file_path = ""
 capture_packets = False  # Change to False initially
 
+def toggle_text_color():
+    global color_index
+    color_index = (color_index + 1) % len(colors)
+    color = colors[color_index]
+    heading_label.config(fg=color)
+    root.after(500, toggle_text_color)  
+
+def on_enter(event):
+    event.widget.config(bg="#000000", fg="white")  # Change background to blue and foreground (text color) to white on mouse enter
+
+def on_leave(event):
+    event.widget.config(bg="#E5E5E5", fg="black")  # Change background back to default and foreground back to black on mouse leave    
+
+
 def button_click(text):
     global file_path, capture_packets
     selected_vulnerability = animal_combobox.get()
@@ -414,14 +428,13 @@ def clear_output():
 root = tk.Tk()
 root.title("Packet Capture and Analyzing Tool")
 
-# Create a frame to contain the heading and set its border color
-heading_frame = tk.Frame(root, bd=2, relief=tk.SOLID, bg="#64adce", highlightbackground="#64adce")
-heading_frame.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky=tk.W+tk.E)
+colors = ["red", "green", "blue", "orange", "purple"]
+color_index = 0
 
-# Add the heading label inside the heading frame
-heading_label = tk.Label(heading_frame, text="Packet Analyzer Tool", font=("Arial", 16))
-heading_label.pack(padx=10, pady=10)
+heading_label = tk.Label(root, text="Packet Analyzer Tool", font=("Arial", 16), bg="#64adce")
+heading_label.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky=tk.W+tk.E)
 
+toggle_text_color()
 # Configure columns to expand horizontally
 root.columnconfigure(0, weight=1)
 root.columnconfigure(1, weight=2)  # Set column 1 to have more weight
@@ -437,13 +450,15 @@ button_texts = ["Start Capture","Stop Capture", "clear","Analyse the Packets" ]
 for i, text in enumerate(button_texts):
     button = tk.Button(button_frame, text=text, command=lambda t=text: button_click(t), highlightbackground="#3d79e1")  # Set button border color
     button.grid(row=0, column=i, padx=5, pady=5, sticky=tk.W)
+    button.bind("<Enter>", on_enter)  # Bind mouse enter event to on_enter function
+    button.bind("<Leave>", on_leave)  # Bind mouse leave event to on_leave function
     if text == "Start Capture":
         start_capture_button = button  # Store reference to the start capture button
 output_frame = tk.Frame(root, bd=2, relief=tk.SOLID, bg="#4887b7", highlightbackground="#4887b7")
 output_frame.grid(row=2, column=0, columnspan=2, padx=10, pady=(0, 10), sticky=tk.NSEW)
 
 # Add Text widget for displaying output directly in the main GUI
-output_text = scrolledtext.ScrolledText(output_frame, height=22, width=200, wrap=tk.NONE)  # Disable text wrapping
+output_text = scrolledtext.ScrolledText(output_frame, height=22, width=200, wrap=tk.NONE, bg = "#E5E5E5")  # Disable text wrapping
 output_text.grid(row=0, column=0, sticky=tk.NSEW)
 
 # Create a horizontal scrollbar
@@ -456,8 +471,14 @@ output_text.config(xscrollcommand=xscrollbar.set)
 box_frame = tk.Frame(root, bd=2, relief=tk.SOLID, bg="#4887b7", highlightbackground="#4887b7")
 box_frame.grid(row=3, column=0, padx=10, pady=(10, 10), sticky=tk.NSEW)
 
+label_frame = tk.Frame(box_frame, bg="white")
+label_frame.pack()
+
+# Add a label inside the label frame
+infected_label = tk.Label(label_frame, text="Infected Packets", font=("Arial", 12), bg="white")
+infected_label.pack(pady=(10, 5))
 # Add Text widget for the new box
-box_text = scrolledtext.ScrolledText(box_frame, height=15, width=120)
+box_text = scrolledtext.ScrolledText(box_frame, height=15, width=120, bg = "#E5E5E5")
 box_text.pack(padx=10, pady=10)
 
 # Create a label for the box heading
